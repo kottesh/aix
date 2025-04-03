@@ -21,7 +21,7 @@ class TransactionCreate(TransactionBase):
 
 class Transaction(TransactionBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    user_id: uuid.UUID = Field(foreign_key="user.id")
+    user_id: uuid.UUID = Field(foreign_key="users.id")
 
     payment_source_id: uuid.UUID
     payment_source_type: PaymentType
