@@ -26,11 +26,14 @@ class BankCreate(BankBase):
 
 class Bank(BankBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(foreign_key="users.id")
 
     created_at: datetime = Field(default_factory=datetime.now)
-    updated_at: datetime | None = Field(
-        default=None,
-        sa_column=Column(DateTime(timezone=True), onupdate=func.now(), nullable=True)
+    updated_at: datetime = Field(
+        default_factory=datetime.now,
+        sa_column_kwargs={
+            "onupdate": datetime.now
+        }
     )
 
 
@@ -43,11 +46,14 @@ class CashCreate(CashBase):
 
 class Cash(CashBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(foreign_key="users.id")
 
     created_at: datetime = Field(default_factory=datetime.now)
-    updated_at: datetime | None = Field(
-        default=None,
-        sa_column=Column(DateTime(timezone=True), onupdate=func.now(), nullable=True)
+    updated_at: datetime = Field(
+        default_factory=datetime.now,
+        sa_column_kwargs={
+            "onupdate": datetime.now
+        }
     )
 
 
@@ -63,9 +69,12 @@ class CardCreate(CardBase):
 
 class Card(CardBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(foreign_key="users.id")
 
     created_at: datetime = Field(default_factory=datetime.now)
-    updated_at: datetime | None = Field(
-        default=None,
-        sa_column=Column(DateTime(timezone=True), onupdate=func.now(), nullable=True)
+    updated_at: datetime = Field(
+        default_factory=datetime.now,
+        sa_column_kwargs={
+            "onupdate": datetime.now
+        }
     )

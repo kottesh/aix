@@ -1,13 +1,7 @@
 from sqlmodel import SQLModel, Field
-from sqlalchemy import DateTime, func, Column
 from datetime import datetime
 from pydantic import BaseModel
 import uuid
-
-class Token(BaseModel):
-    access_token: str
-    refresh_token: str
-    token_type: str = "bearer"
 
 class UserBase(SQLModel):
     name: str
@@ -16,9 +10,10 @@ class UserBase(SQLModel):
 class UserCreate(UserBase):
     password: str
 
-class UserLogin(SQLModel):
-    email: str
-    password: str
+class UserData(UserBase):
+    id: uuid.UUID
+    created_at: datetime
+    updated_at: datetime
 
 class User(UserBase, table=True):
     __tablename__ = "users"
