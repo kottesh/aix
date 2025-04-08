@@ -4,7 +4,8 @@ from pydantic import BaseModel
 import uuid
 
 class UserBase(SQLModel):
-    name: str
+    first_name: str
+    last_name: str | None = None
     email: str = Field(unique=True)
 
 class UserCreate(UserBase):

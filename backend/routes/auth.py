@@ -96,7 +96,8 @@ def create_user(db: db_dependency, user_data: UserCreate) -> User:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="email already exists")
 
         user = User(
-            name=user_data.name,
+            first_name=user_data.first_name,
+            last_name=user_data.last_name,
             email=user_data.email,
             hashed_password=bcrypt_context.hash(user_data.password)
         )

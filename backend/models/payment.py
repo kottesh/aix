@@ -26,7 +26,7 @@ class BankCreate(BankBase):
 
 class Bank(BankBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    user_id: uuid.UUID = Field(foreign_key="users.id")
+    user_id: uuid.UUID = Field(foreign_key="users.id", ondelete="CASCADE")
 
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(
@@ -46,7 +46,7 @@ class CashCreate(CashBase):
 
 class Cash(CashBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    user_id: uuid.UUID = Field(foreign_key="users.id")
+    user_id: uuid.UUID = Field(foreign_key="users.id", ondelete="CASCADE")
 
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(
@@ -69,7 +69,7 @@ class CardCreate(CardBase):
 
 class Card(CardBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    user_id: uuid.UUID = Field(foreign_key="users.id")
+    user_id: uuid.UUID = Field(foreign_key="users.id", ondelete="CASCADE")
 
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(

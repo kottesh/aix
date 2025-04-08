@@ -17,17 +17,26 @@ class TransactionBase(SQLModel):
     description: str | None = None
 
 class TransactionCreate(TransactionBase):
-    date: datetime | None = None
+    payment_source_id: uuid.UUID
+    payment_source_type: PaymentType
+
+class TransactionUpdate(TransactionBase):
+    payment_type: PaymentType
+
+class NLPTransactionCreate(TransactionCreate):
+    pass
 
 class Transaction(TransactionBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    user_id: uuid.UUID = Field(foreign_key="users.id")
+    user_id: uuid.UUID = Field(foreign_key="users.id", ondelete="CASCADE")
 
     payment_source_id: uuid.UUID
     payment_source_type: PaymentType
 
     created_at: datetime = Field(default_factory=datetime.now)
-    updated_at: datetime | None = Field(
-        default=None,
-        sa_column=Column(DateTime(timezone=True), onupdate=func.now(), nullable=True)
+    updated_at: datetime = Field(
+        default_factory=datetime.now,
+        sa_column_kwargs={
+            "onupdate": datetime.now
+        }
     )
