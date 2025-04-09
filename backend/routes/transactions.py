@@ -15,7 +15,8 @@ from models.user import User
 from .auth import get_user
 from uuid import UUID
 from sqlalchemy.exc import NoResultFound
-from datetime import datetime
+from sqlalchemy import desc
+from datetime import datetime, timezone
 
 router = APIRouter(
     prefix="/transactions",
@@ -89,7 +90,7 @@ def remove_transaction(transaction_id: Annotated[UUID, Body(embed=True)], db: db
 @router.patch("/update", status_code=status.HTTP_200_OK)
 def update_transaction(
     *, tid: UUID, update_data: TransactionUpdate, user: User = Depends(get_user), db: db_dependency
-) -> TransactionResponse | JSONResponse:
+): 
     try:
         transaction: Transaction = db.exec(select(Transaction).filter(Transaction.id == tid)).one() # searches for exactly only one record.
 
@@ -100,6 +101,12 @@ def update_transaction(
         if update_data.type:
             transaction.type = update_data.type
         if update_data.date:
+            if update_data.date > datetime.now(timezone.utc):
+                db.rollback()
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="invalid transaction date."
+                )
             transaction.date = update_data.date
         if update_data.description:
             transaction.description = update_data.description
@@ -143,8 +150,9 @@ def update_transaction(
             
             db.add(transaction) 
             db.commit()
+            db.refresh(transaction)
 
-            return transaction
+            return TransactionResponse(**transaction.__dict__)
 
     except NoResultFound:
         return JSONResponse(
@@ -162,24 +170,43 @@ def get_transactions(
     payment_type: PaymentType | None = None,
     from_date: datetime | None = None,
     to_date: datetime | None = None,
+    n: int = 10,
     db: db_dependency
 ) -> list[Transaction]:
+    # TODO: test this route having error in date comparsion.
+    # Handle offset value in the datetime while comparing.
     """
     Fetches transactions from the db and filters it out
     if no transactions found then just return `[]`
+
+    - user -> User who is performing the transaction request
+    - payment_type[Optional] -> One of the BANK or CARD or CASH
+    - from_date[Optional]
+    - to_date[Optional]
+    - n -> number of transactions to fetch with all the applied filters (DEFAULT: 10)
     """
-    # TODO: we could improve the query more.
-    # Instead of getting all the transactions and 
-    # filtering it out in python.
-    transactions = db.exec(select(Transaction).filter(Transaction.user_id == user.id)).all()
+
+    if from_date and from_date > datetime.now(timezone.utc):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="invalid date filter")
+
+    if to_date and to_date > datetime.now(timezone.utc):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="invalid date filter")
+
+    if (from_date and to_date) and from_date > to_date:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="invalid date filter")
+
+    query = select(Transaction).filter(Transaction.user_id == user.id)
 
     if payment_type:
-        transactions = [transaction for transaction in transactions if transaction.type == payment_type]
+        query = query.filter(Transaction.payment_source_type == payment_type)
 
     if from_date:
-        if to_date:
-            transactions = [transaction for transaction in transactions if transaction.created_at >= from_date and transaction.created_at <= to_date]
-        else:
-            transactions = [transaction for transaction in transactions if transaction.created_at >= from_date]
+        query = query.where(Transaction.date >= from_date)
+    if to_date:
+        query = query.where(Transaction.date <= to_date)
+    
+    query = query.order_by(Transaction.created_at.desc()).limit(n)
+
+    transactions = db.exec(query).all()
 
     return transactions

@@ -7,9 +7,9 @@ from typing import Annotated
 from db import db_dependency 
 from dotenv import load_dotenv
 from jwt import encode, decode
-from jwt.exceptions import InvalidTokenError
+from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
 from passlib.context import CryptContext
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import os
 import uuid
 
@@ -42,6 +42,9 @@ def validate_token(token: str, db: Session) -> TokenData | None:
             email=payload.get("sub"),
             user_id=payload.get("user_id")
         )
+
+    except ExpiredSignatureError:
+        return None
 
     except InvalidTokenError:
         return None
@@ -79,7 +82,7 @@ def generate_jwt_token(user_id: uuid.UUID, user_email: str, time_delta: timedelt
     payload = {
         "sub": user_email,
         "user_id": str(user_id),
-        "exp": datetime.now() + time_delta
+        "exp": datetime.now(timezone.utc) + time_delta
     }
 
     token = encode(payload=payload, algorithm=ALGORITHM, key=SECRET_KEY)
