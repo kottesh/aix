@@ -21,7 +21,15 @@ class TransactionCreate(TransactionBase):
     payment_source_type: PaymentType
 
 class TransactionUpdate(TransactionBase):
-    payment_type: PaymentType
+    payment_source_id: uuid.UUID
+    payment_source_type: PaymentType
+
+class TransactionResponse(TransactionBase):
+    id: uuid.UUID
+    payment_source_id: uuid.UUID
+    payment_source_type: PaymentType
+    created_at: uuid.UUID
+    updated_at: uuid.UUID
 
 class NLPTransactionCreate(TransactionCreate):
     pass
