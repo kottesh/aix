@@ -1,12 +1,13 @@
 from sqlmodel import SQLModel, Field
-from datetime import datetime
-from pydantic import BaseModel
+from datetime import datetime, timezone
+from sqlalchemy.types import DateTime
+from pydantic import EmailStr
 import uuid
 
 class UserBase(SQLModel):
     first_name: str
     last_name: str | None = None
-    email: str = Field(unique=True)
+    email: EmailStr = Field(unique=True)
 
 class UserCreate(UserBase):
     password: str
@@ -22,10 +23,14 @@ class User(UserBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str = Field(exclude=True)
 
-    created_at: datetime = Field(default_factory=datetime.now)
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        sa_type=DateTime(timezone=True)
+    )
     updated_at: datetime = Field(
-        default_factory=datetime.now,
+        default_factory=lambda: datetime.now(timezone.utc),
         sa_column_kwargs={
-            "onupdate": datetime.now
-        }
+            "onupdate": lambda: datetime.now(timezone.utc)
+        },
+        sa_type=DateTime(timezone=True)
     )

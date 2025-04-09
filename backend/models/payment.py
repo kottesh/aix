@@ -1,7 +1,7 @@
 from enum import Enum
 from sqlmodel import SQLModel, Field
 from sqlalchemy import Column, func, DateTime
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 
 class PaymentType(str, Enum):
@@ -28,12 +28,16 @@ class Bank(BankBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     user_id: uuid.UUID = Field(foreign_key="users.id", ondelete="CASCADE")
 
-    created_at: datetime = Field(default_factory=datetime.now)
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        sa_type=DateTime(timezone=True)
+    )
     updated_at: datetime = Field(
-        default_factory=datetime.now,
+        default_factory=lambda: datetime.now(timezone.utc),
         sa_column_kwargs={
-            "onupdate": datetime.now
-        }
+            "onupdate": lambda: datetime.now(timezone.utc)
+        },
+        sa_type=DateTime(timezone=True)
     )
 
 
@@ -48,12 +52,16 @@ class Cash(CashBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     user_id: uuid.UUID = Field(foreign_key="users.id", ondelete="CASCADE", unique=True)
 
-    created_at: datetime = Field(default_factory=datetime.now)
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        sa_type=DateTime(timezone=True)
+    )
     updated_at: datetime = Field(
-        default_factory=datetime.now,
+        default_factory=lambda: datetime.now(timezone.utc),
         sa_column_kwargs={
-            "onupdate": datetime.now
-        }
+            "onupdate": lambda: datetime.now(timezone.utc)
+        },
+        sa_type=DateTime(timezone=True)
     )
 
 
@@ -71,10 +79,14 @@ class Card(CardBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     user_id: uuid.UUID = Field(foreign_key="users.id", ondelete="CASCADE")
 
-    created_at: datetime = Field(default_factory=datetime.now)
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        sa_type=DateTime(timezone=True)
+    )
     updated_at: datetime = Field(
-        default_factory=datetime.now,
+        default_factory=lambda: datetime.now(timezone.utc),
         sa_column_kwargs={
-            "onupdate": datetime.now
-        }
+            "onupdate": lambda: datetime.now(timezone.utc)
+        },
+        sa_type=DateTime(timezone=True)
     )

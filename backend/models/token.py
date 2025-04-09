@@ -13,6 +13,7 @@ class TokenData(BaseModel):
 
 class Token(SQLModel, table=True):
     __tablename__ = "token_blacklist"
+
     id: int = Field(default=None, primary_key=True)
     token: str
     expries_at: datetime

@@ -1,7 +1,7 @@
 from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy import Column, DateTime, func
 from .payment import PaymentType
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 import uuid
 
@@ -13,7 +13,7 @@ class TransactionBase(SQLModel):
     amount: float
     category: str
     type: TransactionType
-    date: datetime = Field(default_factory=datetime.now)
+    date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     description: str | None = None
 
 class TransactionCreate(TransactionBase):
@@ -28,8 +28,8 @@ class TransactionResponse(TransactionBase):
     id: uuid.UUID
     payment_source_id: uuid.UUID
     payment_source_type: PaymentType
-    created_at: uuid.UUID
-    updated_at: uuid.UUID
+    created_at: datetime 
+    updated_at: datetime
 
 class NLPTransactionCreate(TransactionCreate):
     pass
@@ -41,10 +41,14 @@ class Transaction(TransactionBase, table=True):
     payment_source_id: uuid.UUID
     payment_source_type: PaymentType
 
-    created_at: datetime = Field(default_factory=datetime.now)
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        sa_type=DateTime(timezone=True)
+    )
     updated_at: datetime = Field(
-        default_factory=datetime.now,
+        default_factory=lambda: datetime.now(timezone.utc),
         sa_column_kwargs={
-            "onupdate": datetime.now
-        }
+            "onupdate": lambda: datetime.now(timezone.utc)
+        },
+        sa_type=DateTime(timezone=True)
     )
