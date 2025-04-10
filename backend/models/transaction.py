@@ -8,6 +8,8 @@ import uuid
 class TransactionType(str, Enum):
     EXPENSE = "Expense"
     INCOME = "Income"
+    IADJUST = "IAdjust"
+    DADJUST = "DAdjust"
 
 class TransactionBase(SQLModel):
     amount: float
@@ -37,6 +39,8 @@ class NLPTransactionCreate(TransactionCreate):
 class Transaction(TransactionBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     user_id: uuid.UUID = Field(foreign_key="users.id", ondelete="CASCADE")
+
+    type: str
 
     payment_source_id: uuid.UUID
     payment_source_type: PaymentType

@@ -1,6 +1,7 @@
 from enum import Enum
 from sqlmodel import SQLModel, Field
-from sqlalchemy import Column, func, DateTime
+from sqlalchemy import DateTime
+from pydantic import BaseModel
 from datetime import datetime, timezone
 import uuid
 
@@ -18,11 +19,22 @@ class Currency(str, Enum):
 
 class BankBase(SQLModel):
     name: str
+    account_no: str = Field(max_length=64)
     amount: float = 0
     currency: Currency = Currency.INR
 
 class BankCreate(BankBase):
     pass
+
+class BankResponse(BankBase):
+    id: uuid.UUID
+    created_at: datetime
+    updated_at: datetime 
+
+class BankUpdate(BaseModel):
+    name: str | None = None
+    account_no: str | None = None
+    currency: Currency | None = None
 
 class Bank(BankBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
@@ -47,6 +59,15 @@ class CashBase(SQLModel):
 
 class CashCreate(CashBase):
     pass
+
+class CashResponse(CashBase):
+    id: uuid.UUID
+    created_at: datetime 
+    updated_at: datetime
+
+class CashUpdate(BaseModel):
+    amount: float | None = None
+    currency: Currency | None = None
 
 class Cash(CashBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)

@@ -125,6 +125,7 @@ def get_bank_accounts(
         select(Bank)
         .filter(Bank.user_id == user.id)
     ).all()
+
     return banks
 
 @router.get("/{bank_id}")
