@@ -12,7 +12,7 @@ from models.transaction import (
 )
 from db import db_dependency
 from models.user import User
-from .auth import get_user
+from .utils import get_user
 from uuid import UUID
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy import desc
@@ -25,7 +25,7 @@ router = APIRouter(
 
 
 @router.post("/create-transaction", status_code=status.HTTP_200_OK)
-def create_transaction(nlp_text: Annotated[str, Body()]) -> list[NLPTransactionCreate]:
+def create_transaction(nlp_text: Annotated[str, Body()], user: User = Depends(get_user)) -> list[NLPTransactionCreate]:
     # TODO: use llm to extract structured transaction from text.
     pass
 
@@ -65,9 +65,9 @@ def add_transaction(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND ,detail="payment id not found.")
 
 @router.delete("/remove")
-def remove_transaction(transaction_id: Annotated[UUID, Body(embed=True)], db: db_dependency) -> dict[str, str]:
+def remove_transaction(*, transaction_id: Annotated[UUID, Body(embed=True)], user: User = Depends(get_user), db: db_dependency) -> dict[str, str]:
     try:
-        transaction = db.exec(select(Transaction).filter(Transaction.id == transaction_id)).one() # searches for exactly only one record.
+        transaction = db.exec(select(Transaction).filter(Transaction.id == transaction_id)).filter(Transaction.user_id == user.id).one() # searches for exactly only one record.
         db.delete(transaction)
         db.commit()
 
@@ -92,7 +92,7 @@ def update_transaction(
     *, tid: UUID, update_data: TransactionUpdate, user: User = Depends(get_user), db: db_dependency
 ): 
     try:
-        transaction: Transaction = db.exec(select(Transaction).filter(Transaction.id == tid)).one() # searches for exactly only one record.
+        transaction: Transaction = db.exec(select(Transaction).filter(Transaction.id == tid)).filter(Transaction.user_id == user.id).one() # searches for exactly only one record if it doesn't find it raises Exception
 
         if update_data.amount:
             transaction.amount = update_data.amount
@@ -201,9 +201,9 @@ def get_transactions(
         query = query.filter(Transaction.payment_source_type == payment_type)
 
     if from_date:
-        query = query.where(Transaction.date >= from_date)
+        query = query.filter(Transaction.date >= from_date)
     if to_date:
-        query = query.where(Transaction.date <= to_date)
+        query = query.filter(Transaction.date <= to_date)
     
     query = query.order_by(Transaction.created_at.desc()).limit(n)
 

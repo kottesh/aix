@@ -1,10 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Body
 from sqlmodel import select
 from models.user import User, UserData
-from .auth import get_user 
+from .utils import get_user, bcrypt_context
 from db import db_dependency
 from typing import Annotated 
-from .auth import bcrypt_context
 from sqlalchemy.exc import NoResultFound
 
 router = APIRouter(
