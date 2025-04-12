@@ -89,16 +89,33 @@ class Cash(CashBase, table=True):
 class CardBase(SQLModel):
     name: str
     limit: float
-    current_usage: float = 0
-    currency: Currency = Currency.INR
+    current_usage: float
+    currency: Currency
     issuing_bank_name: str
+    network: str
 
 class CardCreate(CardBase):
-    pass
+    current_usage: float = Field(default=0, gt=0)
+    currency: Currency = Currency.INR
+    card_network: str | None = None 
+
+class CardUpdate(BaseModel):
+    name: str | None = None
+    limit: float | None = Field(default=None, gt=0) 
+    current_usage: float | None = Field(default=None, gt=0)
+    currency: Currency | None = None 
+    issuing_bank_name: str | None = None
+    card_network: str | None = None
+
+class CardResponse(CardBase):
+    id: uuid.UUID
+    created_at: datetime
+    updated_at: datetime
 
 class Card(CardBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     user_id: uuid.UUID = Field(foreign_key="users.id", ondelete="CASCADE")
+    balance: float
 
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),

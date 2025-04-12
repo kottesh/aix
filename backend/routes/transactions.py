@@ -48,7 +48,7 @@ def add_transaction(
         transaction = Transaction(
             amount=transaction.amount,
             category=transaction.category,
-            type=transaction.type,
+            type=transaction.type.value,
             date=transaction.date,
             description=transaction.description,
             user_id=user.id,
@@ -99,7 +99,7 @@ def update_transaction(
         if update_data.category:
             transaction.category = update_data.category
         if update_data.type:
-            transaction.type = update_data.type
+            transaction.type = update_data.type.value
         if update_data.date:
             if update_data.date > datetime.now(timezone.utc):
                 db.rollback()
