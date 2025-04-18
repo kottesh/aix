@@ -1,13 +1,14 @@
-export const COLORS = {
-    primary: '#6200EE',
-    secondary: '#03DAC6',
-    background: '#121212',
-    surface: '#1E1E1E',
-    textPrimary: '#FFFFFF',
-    textSecondary: '#BDBDBD',
-    icon: '#BDBDBD',
-    border: '#373737',
-    error: '#CF6679',
-    success: '#689F38',
-    white: '#FFFFFF',
-}
+const COLORS = {
+    background: "#121212",
+    textPrimary: "#FFFFFF",
+    textSecondary: "#AAAAAA",
+    inputBackground: "#1E1E1E",
+    inputPlaceholder: "#666666",
+    border: "#333333",
+    primary: "#2874ED",
+    white: "#FFFFFF",
+    accent: "#FFCC00",
+    error: "#e62727"
+  };
+  
+export default COLORS;
